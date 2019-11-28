@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/samos123/k8s-dynamic-bandwidth-qos/pkg/poller"
+	"github.com/samos123/k8s-qos/pkg/poller"
 	"time"
 )
 
