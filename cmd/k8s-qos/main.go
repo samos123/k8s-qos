@@ -1,17 +1,21 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/samos123/k8s-qos/pkg/poller"
 	"time"
 )
 
 func main() {
-	c := time.Tick(10 * time.Second)
+	interval := flag.Int("interval", 10, "Interval to pull metrics from kubelet")
+	url := "http://localhost:10255/stats/summary"
+	kubeletUrl := flag.String("url", url, "URL to kubelet stats/summary endpoint")
+	flag.Parse()
+	c := time.Tick(time.Second * time.Duration(*interval))
 	for _ = range c {
-		url := "http://localhost:10255/stats/summary"
-		fmt.Println("Getting metrics from URL:", url)
-		json := poller.GetMetrics(url)
+		fmt.Println("Getting metrics from URL:", *kubeletUrl)
+		json := poller.GetMetrics(*kubeletUrl)
 		metrics := poller.ParseNetworkMetrics(json)
 		fmt.Println(metrics)
 	}
