@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: debug-pod
   labels:
-    app: debug
+    app: debug-pod
 spec:
   hostNetwork: true
   hostPID: true
