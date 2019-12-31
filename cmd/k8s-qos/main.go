@@ -12,14 +12,16 @@ func main() {
 	url := "http://localhost:10255"
 	kubeletUrl := flag.String("url", url, "URL to kubelet api endpoint")
 	flag.Parse()
+	controller := poller.NewContoller()
 	c := time.Tick(time.Second * time.Duration(*interval))
 	for _ = range c {
 		json := poller.GetURL(*kubeletUrl + "/stats/summary")
 		metrics := poller.ParseNetworkMetrics(json)
 		fmt.Println(metrics)
-		json = poller.GetURL(*kubeletUrl + "/pods")
-		pods := poller.ParsePods(json)
-		fmt.Println(pods)
+		pods := controller.GetPods(*kubeletUrl + "/pods")
+		for _, p := range pods {
+			p.GetVeth()
+		}
 	}
 	fmt.Println("Exitting")
 }

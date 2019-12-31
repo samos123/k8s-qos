@@ -6,6 +6,8 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -33,15 +35,58 @@ type Container struct {
 	Veth string
 }
 
+type Controller struct {
+	Pods            []Pod
+	PodNetworkStats []PodNetworkStats
+}
+
+func NewContoller() *Controller {
+	c := Controller{}
+	return &c
+}
+
+func (c *Controller) GetPods(url string) []Pod {
+	json := GetURL(url)
+	c.Pods = ParsePods(json)
+	return c.Pods
+}
+
+func (p *Pod) GetVeth() {
+	// TODO use Docker golang client
+	for _, c := range p.Containers {
+		out, err := exec.Command("getveth.sh", c.ID).Output()
+		if err != nil {
+			log.Println(err, out)
+			continue
+		}
+		c.Veth = string(out)
+		if strings.HasPrefix(c.Veth, "veth") {
+			p.Veth = c.Veth
+			break
+		}
+	}
+}
+
+func TcLimit(netinterface, rate, latency string) {
+	// tc qdisc change dev veth82f84ccb root tbf rate 2mbit latency 50ms burst 1540
+	cmd := exec.Command("tc", "qdisc", "change", "dev", netinterface, "root", "tbf", "rate", rate, "latency", latency, "burst", "1540")
+	err := cmd.Run()
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func GetURL(url string) []byte {
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Println("Error occured trying to get URL from Kubelet:", url, err)
+		return nil
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("Error occured reading HTTP body:", err)
+		return nil
 	}
 	return body
 }
@@ -67,7 +112,7 @@ func ParsePods(json []byte) []Pod {
 		containers.ForEach(func(key2, cResult gjson.Result) bool {
 			c := Container{}
 			c.Name = cResult.Get("name").String()
-			c.ID = cResult.Get("containerID").String()
+			c.ID = strings.TrimPrefix(cResult.Get("containerID").String(), "docker://")
 			p.Containers[j] = c
 			j++
 			return true
