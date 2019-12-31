@@ -32,3 +32,11 @@ func TestParseNetworkMetrics(t *testing.T) {
 	equals(t, s[0].Name, "network-metering-agent-bljqp")
 	fmt.Println(s)
 }
+func TestParsePods(t *testing.T) {
+	json, err := ioutil.ReadFile("../../test/pods.json")
+	check(err)
+	s := ParsePods(json)
+	equals(t, s[0].Name, "webhook-6cbdc8b54-d5fq7")
+	fmt.Println(s[0])
+	equals(t, s[0].Containers[0].Name, "webhook")
+}

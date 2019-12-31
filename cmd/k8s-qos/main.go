@@ -15,7 +15,7 @@ func main() {
 	c := time.Tick(time.Second * time.Duration(*interval))
 	for _ = range c {
 		fmt.Println("Getting metrics from URL:", *kubeletUrl)
-		json := poller.GetMetrics(*kubeletUrl)
+		json := poller.GetURL(*kubeletUrl)
 		metrics := poller.ParseNetworkMetrics(json)
 		fmt.Println(metrics)
 	}
