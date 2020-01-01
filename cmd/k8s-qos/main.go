@@ -22,6 +22,7 @@ func main() {
 		for _, p := range pods {
 			p.GetVeth()
 		}
+		fmt.Println(pods)
 	}
 	fmt.Println("Exitting")
 }
