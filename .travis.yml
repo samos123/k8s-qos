@@ -1,0 +1,12 @@
+language: go
+dist: bionic
+services: docker
+go_import_path: github.com/samos123/k8s-qos
+
+script:
+- make
+- docker build -t samos123/k8s-qos .
+
+deploy:
+  provider: script
+  script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && docker push samos123/k8s-qos:latest
