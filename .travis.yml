@@ -5,8 +5,8 @@ go_import_path: github.com/samos123/k8s-qos
 
 script:
 - make
-- docker build -t samos123/k8s-qos .
+- docker build -t samos123/k8s-qos:$TRAVIS_COMMIT .
 
 deploy:
   provider: script
-  script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && docker push samos123/k8s-qos:latest
+  script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && docker push samos123/k8s-qos:$TRAVIS_COMMIT
