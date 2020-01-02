@@ -35,22 +35,6 @@ type Container struct {
 	Veth string
 }
 
-type Controller struct {
-	Pods            []Pod
-	PodNetworkStats []PodNetworkStats
-}
-
-func NewContoller() *Controller {
-	c := Controller{}
-	return &c
-}
-
-func (c *Controller) GetPods(url string) []Pod {
-	json := GetURL(url)
-	c.Pods = ParsePods(json)
-	return c.Pods
-}
-
 func (p *Pod) GetVeth() {
 	// TODO use Docker golang client
 	for _, c := range p.Containers {
