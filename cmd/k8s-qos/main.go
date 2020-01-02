@@ -20,8 +20,8 @@ func main() {
 		log.WithFields(log.Fields{"metrics": metrics}).Info("Parsed metrics")
 		json = poller.GetURL(*kubeletUrl + "/pods")
 		pods := poller.ParsePods(json)
-		for _, p := range pods {
-			p.GetVeth()
+		for i := range pods {
+			pods[i].GetVeth()
 		}
 		log.WithFields(log.Fields{"pods": pods}).Info("Parsed pods")
 	}

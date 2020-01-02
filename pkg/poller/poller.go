@@ -37,14 +37,14 @@ type Container struct {
 
 func (p *Pod) GetVeth() {
 	// TODO use Docker golang client
-	for _, c := range p.Containers {
+	for i, c := range p.Containers {
 		out, err := exec.Command("getveth.sh", c.ID).Output()
 		if err != nil {
 			log.WithFields(log.Fields{"err": err, "out": out}).Warn("error running getveth.sh")
 			continue
 		}
 		log.WithFields(log.Fields{"out": out, "container": c, "pod": p}).Info("ran getveth.sh")
-		c.Veth = string(out)
+		p.Containers[i].Veth = string(out)
 		if strings.HasPrefix(c.Veth, "veth") {
 			p.Veth = c.Veth
 			log.WithFields(log.Fields{"container": c, "pod": p}).Info("found veth")
