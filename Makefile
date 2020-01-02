@@ -15,5 +15,5 @@ run: build
 	./$(BINARY)
 
 clean:
-	rm $(BINARY)
+	rm -f $(BINARY)
 
