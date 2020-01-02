@@ -1,9 +1,9 @@
 package poller
 
 import (
+	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"os/exec"
@@ -56,12 +56,14 @@ func (p *Pod) GetVeth() {
 	for _, c := range p.Containers {
 		out, err := exec.Command("getveth.sh", c.ID).Output()
 		if err != nil {
-			log.Println(err, out)
+			log.WithFields(log.Fields{"err": err, "out": out}).Warn("error running getveth.sh")
 			continue
 		}
+		log.WithFields(log.Fields{"out": out, "container": c, "pod": p}).Info("ran getveth.sh")
 		c.Veth = string(out)
 		if strings.HasPrefix(c.Veth, "veth") {
 			p.Veth = c.Veth
+			log.WithFields(log.Fields{"container": c, "pod": p}).Info("found veth")
 			break
 		}
 	}
@@ -79,13 +81,13 @@ func TcLimit(netinterface, rate, latency string) {
 func GetURL(url string) []byte {
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Println("Error occured trying to get URL from Kubelet:", url, err)
+		log.Warn("Error occured trying to get URL from Kubelet:", url, err)
 		return nil
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("Error occured reading HTTP body:", err)
+		log.Warn("Error occured reading HTTP body:", err)
 		return nil
 	}
 	return body

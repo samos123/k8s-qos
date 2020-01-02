@@ -1,6 +1,6 @@
 BINARY := k8s-qos
 
-all: test $(BINARY)
+all: clean test $(BINARY)
 
 test: deps
 	go test ./... -test.v
