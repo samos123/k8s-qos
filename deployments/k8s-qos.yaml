@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: k8s-qos
+  labels:
+    app: k8s-qos
+spec:
+  selector:
+    matchLabels:
+      app: k8s-qos
+  template:
+    metadata:
+      labels:
+        app: k8s-qos
+    spec:
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - name: k8s-qos
+        image: samos123/k8s-qos:latest
+        volumeMounts:
+          - name: dockersock
+            mountPath: "/var/run/docker.sock"
+        securityContext:
+          privileged: true
+          capabilities:
+            add: ["NET_ADMIN"]
+      volumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
