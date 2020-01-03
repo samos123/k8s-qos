@@ -64,3 +64,18 @@ the following limitations:
 *  Installation of a CNI plugin, which may not be possible
 *  Unable to automatically adjust based on traffic patterns
 
+
+### Developing with skaffold
+Skaffold can be used to automatically build a new image, push it to registry
+and then deploy it. View the `skaffold.yaml` to see the default config.
+
+The following steps are needed to use skaffold:
+1. Create a GKE cluster and configue kubectl to use it as default
+2. Create service account for Kaniko and assign permissions
+```
+export PROJECT=yourgcpproject
+gcloud iam service-accounts keys create kaniko-secret.json --iam-account kaniko@$PROJECT.iam.gserviceaccount.com
+gcloud iam service-accounts create kaniko --description "Build docker images with kaniko" --display-name kaniko
+gcloud projects add-iam-policy-binding $PROJECT --member serviceAccount:kaniko@$PROJECT.iam.gserviceaccount.com --role roles/storage.admin
+```
+3. Run skaffold with `skaffold dev`

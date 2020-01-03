@@ -5,8 +5,13 @@ metadata:
 build:
   artifacts:
   - image: gcr.io/gsam-123/k8s-qos
-  googleCloudBuild:
-    projectId: gsam-123
+    kaniko:
+      buildContext:
+        localDir: {}
+      cache: {}
+  cluster:
+    pullSecret: kaniko-secret.json
+    namespace: default
 deploy:
   kubectl:
     manifests:
