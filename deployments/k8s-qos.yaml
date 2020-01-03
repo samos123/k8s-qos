@@ -17,7 +17,7 @@ spec:
       hostPID: true
       containers:
       - name: k8s-qos
-        image: samos123/k8s-qos:latest
+        image: gcr.io/gsam-123/k8s-qos
         volumeMounts:
           - name: dockersock
             mountPath: "/var/run/docker.sock"

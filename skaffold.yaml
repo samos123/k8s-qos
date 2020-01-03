@@ -1,0 +1,13 @@
+apiVersion: skaffold/v2alpha1
+kind: Config
+metadata:
+  name: k8s-qos
+build:
+  artifacts:
+  - image: gcr.io/gsam-123/k8s-qos
+  googleCloudBuild:
+    projectId: gsam-123
+deploy:
+  kubectl:
+    manifests:
+    - deployments/k8s-qos.yaml
