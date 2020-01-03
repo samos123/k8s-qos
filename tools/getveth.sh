@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+set -xe
+
 veth=""
+
+if [ "$EUID" -ne 0 ]; then
+    sudo="sudo"
+else
+    sudo=""
+fi
 
 get_veth () {
     # This function expects docker container ID as the first argument
@@ -9,7 +17,7 @@ get_veth () {
         veth="host"
     else
         pid=$(docker inspect --format '{{.State.Pid}}' "$1")
-        ifindex=$(nsenter -t $pid -n ip link | sed -n -e 's/.*eth0@if\([0-9]*\):.*/\1/p')
+        ifindex=$($sudo nsenter -t $pid -n ip link | sed -n -e 's/.*eth0@if\([0-9]*\):.*/\1/p')
         if [ -z "$ifindex" ]; then
             veth="not_found"
         else
