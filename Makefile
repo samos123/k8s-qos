@@ -6,7 +6,7 @@ test: deps
 	go test ./... -test.v
 
 deps:
-	go get -d ./...
+	go get -t -d ./...
 
 $(BINARY): deps
 	go build -o $(BINARY) cmd/k8s-qos/main.go
