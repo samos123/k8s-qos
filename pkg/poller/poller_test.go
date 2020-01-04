@@ -59,6 +59,13 @@ func setup() {
 		panic(err)
 	}
 
+	path, err := filepath.Abs("../../tools")
+	check(err)
+	fmt.Println("Path:", path)
+
+	os.Setenv("PATH", os.Getenv("PATH")+":"+path)
+	fmt.Println("Path:", os.Getenv("PATH"))
+
 }
 
 func cleanup() {
@@ -102,12 +109,6 @@ func TestParsePods(t *testing.T) {
 
 func TestGetVeth(t *testing.T) {
 	containers := []Container{Container{ID: containerID}}
-	path, err := filepath.Abs("../../tools")
-	check(err)
-	fmt.Println("Path:", path)
-
-	os.Setenv("PATH", os.Getenv("PATH")+":"+path)
-	fmt.Println("Path:", os.Getenv("PATH"))
 	p := Pod{Name: "test", Containers: containers}
 	p.GetVeth()
 	if !strings.HasPrefix(p.Veth, "veth") {
@@ -127,4 +128,15 @@ func TestTotalBWonGKE(t *testing.T) {
 	equals(t, TotalBWonGKE(16), 32000)
 	equals(t, TotalBWonGKE(20), 32000)
 	equals(t, TotalBWonGKE(96), 32000)
+}
+
+func TestTcLimit(t *testing.T) {
+	TcLimit("eth0", "50mbit", "50ms")
+}
+
+func TestPodLimit(t *testing.T) {
+	containers := []Container{Container{ID: containerID}}
+
+	p := Pod{Name: "test", Containers: containers}
+	p.Limit(int64(50), 50)
 }

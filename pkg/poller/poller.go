@@ -1,12 +1,14 @@
 package poller
 
 import (
+	"bytes"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -93,18 +95,24 @@ func (p *Pod) GetVeth() {
 
 // Apply a bandwidth limit on the pod
 func (p *Pod) Limit(rate int64, latency int) {
-	log.WithFields(log.Fields{"pod": p, "limit": rate}).Info("Applying limit to pod")
 	p.GetVeth()
-	p.BWLimit = rate
-	TcLimit(p.Veth, string(rate)+"mbit", string(latency)+"ms")
+	if strings.HasPrefix(p.Veth, "veth") {
+		log.WithFields(log.Fields{"pod": p, "limit": rate}).Info("Applying limit to pod")
+		p.BWLimit = rate
+		TcLimit(p.Veth, strconv.FormatInt(rate, 10)+"mbit", strconv.Itoa(latency)+"ms")
+	}
 }
 
 // Apply a bandwdith limit using the tc linux command
 func TcLimit(netinterface, rate, latency string) {
-	cmd := exec.Command("tc", "qdisc", "change", "dev", netinterface,
+	cmd := exec.Command("tc", "qdisc", "add", "dev", netinterface,
 		"root", "tbf", "rate", rate, "latency", latency, "burst", "1540")
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		log.Error("Error occured executing tc command", err)
+		log.WithFields(log.Fields{"cmd": cmd, "err": err,
+			"stderr": stderr.String()}).Error("Error occured executing tc command")
 	}
 }
 
