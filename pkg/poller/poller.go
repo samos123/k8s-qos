@@ -20,13 +20,12 @@ type PodNetworkStats struct {
 }
 
 type Pod struct {
-	Name         string
-	UID          string
-	IPAddress    net.IP
-	Veth         string
-	IngressLimit int64
-	EgressLimit  int64
-	Containers   []Container
+	Name       string
+	UID        string
+	IPAddress  net.IP
+	Veth       string
+	BWLimit    int64
+	Containers []Container
 }
 
 type Container struct {
@@ -35,17 +34,56 @@ type Container struct {
 	Veth string
 }
 
+// Applies bandwidth limits based on the number of pods. The parameter totalBW
+// is in Mbit/s
+func PodCountLimiter(pods []Pod, totalBW int) {
+	n := len(pods)
+	var limit int64
+	if n == 1 {
+		return
+	} else if n >= 2 && n < 4 {
+		limit = int64(float64(totalBW) * float64(0.8))
+	} else if n >= 4 && n < 8 {
+		limit = int64(float64(totalBW) * float64(0.6))
+	} else {
+		limit = int64(float64(totalBW) * float64(0.4))
+	}
+	for _, pod := range pods {
+		pod.Limit(limit, 20)
+	}
+}
+
+// Calculate total BW based on the amount of CPUs. This currently assumes
+// that n1 machine type is used.
+// TODO: Have a more dynamic way of calculating total bandwidth
+func TotalBWonGKE(cpus int) int {
+	switch {
+	case cpus == 1:
+		return 2 * 1000
+	case cpus >= 2 && cpus <= 4:
+		return 10 * 1000
+	case cpus >= 8 && cpus <= 15:
+		return 16 * 1000
+	case cpus >= 16:
+		return 32 * 1000
+	}
+	return 32 * 1000
+}
+
 func (p *Pod) GetVeth() {
 	// TODO use Docker golang client
-	for i, c := range p.Containers {
+	for i := range p.Containers {
+		c := p.Containers[i]
 		out, err := exec.Command("getveth.sh", c.ID).Output()
 		if err != nil {
 			log.WithFields(log.Fields{"err": err, "out": out}).Warn("error running getveth.sh")
 			continue
 		}
 		log.WithFields(log.Fields{"out": out, "container": c, "pod": p}).Info("ran getveth.sh")
-		p.Containers[i].Veth = string(out)
+		c.Veth = string(out)
 		if strings.HasPrefix(c.Veth, "veth") {
+			split := strings.Split(c.Veth, "@")
+			c.Veth = split[0]
 			p.Veth = c.Veth
 			log.WithFields(log.Fields{"container": c, "pod": p}).Info("found veth")
 			break
@@ -53,12 +91,20 @@ func (p *Pod) GetVeth() {
 	}
 }
 
+// Apply a bandwidth limit on the pod
+func (p *Pod) Limit(rate int64, latency int) {
+	log.WithFields(log.Fields{"pod": p, "limit": rate}).Info("Applying limit to pod")
+	p.GetVeth()
+	p.BWLimit = rate
+	TcLimit(p.Veth, string(rate)+"mbit", string(latency)+"ms")
+}
+
+// Apply a bandwdith limit using the tc linux command
 func TcLimit(netinterface, rate, latency string) {
-	// tc qdisc change dev veth82f84ccb root tbf rate 2mbit latency 50ms burst 1540
-	cmd := exec.Command("tc", "qdisc", "change", "dev", netinterface, "root", "tbf", "rate", rate, "latency", latency, "burst", "1540")
-	err := cmd.Run()
-	if err != nil {
-		log.Println(err)
+	cmd := exec.Command("tc", "qdisc", "change", "dev", netinterface,
+		"root", "tbf", "rate", rate, "latency", latency, "burst", "1540")
+	if err := cmd.Run(); err != nil {
+		log.Error("Error occured executing tc command", err)
 	}
 }
 

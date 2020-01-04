@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 )
@@ -109,6 +110,21 @@ func TestGetVeth(t *testing.T) {
 	fmt.Println("Path:", os.Getenv("PATH"))
 	p := Pod{Name: "test", Containers: containers}
 	p.GetVeth()
+	if !strings.HasPrefix(p.Veth, "veth") {
+		t.Errorf("p.Veth: %s should start with veth", p.Veth)
+	}
+	if strings.Contains(p.Veth, "@if") {
+		t.Errorf("p.Veth: %s contains @if which should be stripped", p.Veth)
+	}
 	fmt.Println(p)
+}
 
+func TestTotalBWonGKE(t *testing.T) {
+	equals(t, TotalBWonGKE(1), 2000)
+	equals(t, TotalBWonGKE(2), 10000)
+	equals(t, TotalBWonGKE(4), 10000)
+	equals(t, TotalBWonGKE(8), 16000)
+	equals(t, TotalBWonGKE(16), 32000)
+	equals(t, TotalBWonGKE(20), 32000)
+	equals(t, TotalBWonGKE(96), 32000)
 }
