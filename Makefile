@@ -3,7 +3,7 @@ BINARY := k8s-qos
 all: clean test $(BINARY)
 
 test: deps
-	go test ./... -test.v
+	go test ./... -test.v -cover
 
 deps:
 	go get -t -d ./...
