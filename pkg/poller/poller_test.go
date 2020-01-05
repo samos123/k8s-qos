@@ -122,9 +122,10 @@ func TestGetVeth(t *testing.T) {
 
 func TestTotalBWonGKE(t *testing.T) {
 	equals(t, TotalBWonGKE(1), 2000)
-	equals(t, TotalBWonGKE(2), 10000)
-	equals(t, TotalBWonGKE(4), 10000)
+	equals(t, TotalBWonGKE(2), 4000)
+	equals(t, TotalBWonGKE(4), 8000)
 	equals(t, TotalBWonGKE(8), 16000)
+	equals(t, TotalBWonGKE(15), 30000)
 	equals(t, TotalBWonGKE(16), 32000)
 	equals(t, TotalBWonGKE(20), 32000)
 	equals(t, TotalBWonGKE(96), 32000)

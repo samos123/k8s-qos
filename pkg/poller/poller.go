@@ -58,18 +58,11 @@ func PodCountLimiter(pods []Pod, totalBW int) (limit int) {
 // Calculate total BW based on the amount of CPUs. This currently assumes
 // that n1 machine type is used.
 // TODO: Have a more dynamic way of calculating total bandwidth
-func TotalBWonGKE(cpus int) int {
-	switch {
-	case cpus == 1:
-		return 2 * 1000
-	case cpus >= 2 && cpus <= 4:
-		return 10 * 1000
-	case cpus >= 8 && cpus <= 15:
-		return 16 * 1000
-	case cpus >= 16:
-		return 32 * 1000
+func TotalBWonGKE(cpus int) (BWmbps int) {
+	if cpus >= 16 {
+		return 32000
 	}
-	return 32 * 1000
+	return cpus * 2000
 }
 
 func (p *Pod) GetVeth() {
