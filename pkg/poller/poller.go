@@ -26,7 +26,7 @@ type Pod struct {
 	UID        string
 	IPAddress  net.IP
 	Veth       string
-	BWLimit    int64
+	BWLimit    int
 	Containers []Container
 }
 
@@ -38,21 +38,21 @@ type Container struct {
 
 // Applies bandwidth limits based on the number of pods. The parameter totalBW
 // is in Mbit/s
-func PodCountLimiter(pods []Pod, totalBW int) {
+func PodCountLimiter(pods []Pod, totalBW int) (limit int) {
 	n := len(pods)
-	var limit int64
 	if n == 1 {
-		return
+		return limit
 	} else if n >= 2 && n < 4 {
-		limit = int64(float64(totalBW) * float64(0.8))
+		limit = int(float64(totalBW) * float64(0.8))
 	} else if n >= 4 && n < 8 {
-		limit = int64(float64(totalBW) * float64(0.6))
+		limit = int(float64(totalBW) * float64(0.6))
 	} else {
-		limit = int64(float64(totalBW) * float64(0.4))
+		limit = int(float64(totalBW) * float64(0.4))
 	}
 	for _, pod := range pods {
 		pod.Limit(limit, 20)
 	}
+	return limit
 }
 
 // Calculate total BW based on the amount of CPUs. This currently assumes
@@ -94,12 +94,12 @@ func (p *Pod) GetVeth() {
 }
 
 // Apply a bandwidth limit on the pod
-func (p *Pod) Limit(rate int64, latency int) {
+func (p *Pod) Limit(rate int, latency int) {
 	p.GetVeth()
 	if strings.HasPrefix(p.Veth, "veth") {
 		log.WithFields(log.Fields{"pod": p, "limit": rate}).Info("Applying limit to pod")
 		p.BWLimit = rate
-		TcLimit(p.Veth, strconv.FormatInt(rate, 10)+"mbit", strconv.Itoa(latency)+"ms")
+		TcLimit(p.Veth, strconv.Itoa(rate)+"mbit", strconv.Itoa(latency)+"ms")
 	}
 }
 

@@ -19,7 +19,7 @@ func main() {
 	for _ = range c {
 		json := poller.GetURL(*kubeletUrl + "/stats/summary")
 		metrics := poller.ParseNetworkMetrics(json)
-		log.WithFields(log.Fields{"metrics": metrics}).Info("Parsed metrics")
+		log.WithFields(log.Fields{"metrics": metrics}).Debug("Parsed metrics")
 		json = poller.GetURL(*kubeletUrl + "/pods")
 		pods := poller.ParsePods(json)
 		log.WithFields(log.Fields{"pods": pods}).Info("Applying bandwidth limit on pods")

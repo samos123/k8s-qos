@@ -138,5 +138,17 @@ func TestPodLimit(t *testing.T) {
 	containers := []Container{Container{ID: containerID}}
 
 	p := Pod{Name: "test", Containers: containers}
-	p.Limit(int64(50), 50)
+	p.Limit(50, 50)
+}
+
+func TestPodCountLimiter(t *testing.T) {
+	containers := []Container{Container{ID: containerID}}
+
+	p := Pod{Name: "test", Containers: containers}
+	pods := []Pod{p}
+	equals(t, PodCountLimiter(pods, 100), 0)
+	pods = []Pod{p, p}
+	equals(t, PodCountLimiter(pods, 100), 80)
+	pods = []Pod{p, p, p, p}
+	equals(t, PodCountLimiter(pods, 100), 60)
 }
