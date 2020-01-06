@@ -1,6 +1,7 @@
 Dynamic Bandwidth QoS in K8s
 ============================
 [![Build Status](https://travis-ci.org/samos123/k8s-qos.svg?branch=master)](https://travis-ci.org/samos123/k8s-qos)
+[![Go Report Card](https://goreportcard.com/badge/github.com/samos123/k8s-qos)](https://goreportcard.com/report/github.com/samos123/k8s-qos)
 
 Multi-tenant K8s clusters often see the issue of one pod taking up all
 the available bandwidth on a node. This might cause loss of service for
