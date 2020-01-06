@@ -16,7 +16,7 @@ func main() {
 	flag.Parse()
 	c := time.Tick(time.Second * time.Duration(*interval))
 	totalBW := poller.TotalBWonGKE(runtime.NumCPU())
-	for _ = range c {
+	for range c {
 		json := poller.GetURL(*kubeletUrl + "/stats/summary")
 		metrics := poller.ParseNetworkMetrics(json)
 		log.WithFields(log.Fields{"metrics": metrics}).Debug("Parsed metrics")

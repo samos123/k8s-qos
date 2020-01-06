@@ -105,20 +105,20 @@ func TcLimit(netinterface, rate, latency string) {
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		log.WithFields(log.Fields{"cmd": cmd, "err": err,
-			"stderr": stderr.String()}).Error("Error occured executing tc command")
+			"stderr": stderr.String()}).Error("Error occurred executing tc command")
 	}
 }
 
 func GetURL(url string) []byte {
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Warn("Error occured trying to get URL from Kubelet:", url, err)
+		log.Warn("Error occurred trying to get URL from Kubelet:", url, err)
 		return nil
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Warn("Error occured reading HTTP body:", err)
+		log.Warn("Error occurred reading HTTP body:", err)
 		return nil
 	}
 	return body

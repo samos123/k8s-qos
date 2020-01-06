@@ -108,7 +108,7 @@ func TestParsePods(t *testing.T) {
 }
 
 func TestGetVeth(t *testing.T) {
-	containers := []Container{Container{ID: containerID}}
+	containers := []Container{{ID: containerID}}
 	p := Pod{Name: "test", Containers: containers}
 	p.GetVeth()
 	if !strings.HasPrefix(p.Veth, "veth") {
@@ -136,14 +136,14 @@ func TestTcLimit(t *testing.T) {
 }
 
 func TestPodLimit(t *testing.T) {
-	containers := []Container{Container{ID: containerID}}
+	containers := []Container{{ID: containerID}}
 
 	p := Pod{Name: "test", Containers: containers}
 	p.Limit(50, 50)
 }
 
 func TestPodCountLimiter(t *testing.T) {
-	containers := []Container{Container{ID: containerID}}
+	containers := []Container{{ID: containerID}}
 
 	p := Pod{Name: "test", Containers: containers}
 	pods := []Pod{p}
