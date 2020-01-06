@@ -96,7 +96,7 @@ func (p *Pod) Limit(rate int, latency int) {
 	}
 }
 
-// Apply a bandwdith limit using the tc linux command
+// Apply a bandwidth limit using the tc linux command
 func TcLimit(netinterface, rate, latency string) {
 	cmd := exec.Command("tc", "qdisc", "add", "dev", netinterface,
 		"root", "tbf", "rate", rate, "latency", latency, "burst", "1540")
